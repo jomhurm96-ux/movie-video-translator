@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Movie Recap Translator</title>
 
   <style>
@@ -53,10 +54,6 @@
       cursor: pointer;
     }
 
-    button:disabled {
-      background: #555;
-    }
-
     video {
       width: 100%;
       margin-top: 20px;
@@ -90,9 +87,19 @@
   <video id="preview" controls></video>
 
   <select id="language">
-    <option value="Burmese">🇲🇲 မြန်မာ</option>
-    <option value="Thai">🇹🇭 ထိုင်း</option>
-    <option value="English">🇬🇧 English</option>
+
+    <option value="Burmese">
+      🇲🇲 မြန်မာ
+    </option>
+
+    <option value="Thai">
+      🇹🇭 ထိုင်း
+    </option>
+
+    <option value="English">
+      🇬🇧 English
+    </option>
+
   </select>
 
   <button id="uploadButton" type="button">
@@ -105,10 +112,8 @@
 
 </div>
 
-<script type="module">
 
-import { upload } from "https://cdn.jsdelivr.net/npm/@vercel/blob@2.0.0/+esm";
-
+<script>
 
 const videoFile =
   document.getElementById("videoFile");
@@ -123,78 +128,52 @@ const status =
   document.getElementById("status");
 
 
-videoFile.addEventListener("change", () => {
+videoFile.addEventListener(
+  "change",
+  function () {
 
-  const file =
-    videoFile.files[0];
+    const file =
+      videoFile.files[0];
 
-  if (!file) return;
+    if (!file) return;
 
-  preview.src =
-    URL.createObjectURL(file);
+    preview.src =
+      URL.createObjectURL(file);
 
-  preview.style.display =
-    "block";
-
-  status.innerText =
-    "✅ Video ရွေးပြီးပါပြီ\n\n" +
-    file.name +
-    "\n" +
-    Math.round(file.size / 1024 / 1024) +
-    " MB";
-
-});
-
-
-button.addEventListener("click", async () => {
-
-  const file =
-    videoFile.files[0];
-
-  if (!file) {
+    preview.style.display =
+      "block";
 
     status.innerText =
-      "⚠️ Video အရင်ရွေးပါ";
-
-    return;
-  }
-
-  button.disabled = true;
-
-  status.innerText =
-    "⏳ Video Upload လုပ်နေပါတယ်...\n\n" +
-    "19 MB ဆို ခဏစောင့်ပါ။";
-
-  try {
-
-    const blob = await upload(
-      file.name,
-      file,
-      {
-        access: "public",
-        handleUploadUrl: "/api/video"
-      }
-    );
-
-    status.innerText =
-      "✅ Video Upload အောင်မြင်ပါပြီ!\n\n" +
-      blob.url;
-
-  } catch (error) {
-
-    console.error(error);
-
-    status.innerText =
-      "❌ Upload Error:\n\n" +
-      error.message;
-
-  } finally {
-
-    button.disabled = false;
+      "✅ Video ရွေးပြီးပါပြီ\n\n" +
+      file.name;
 
   }
+);
 
-});
+
+button.addEventListener(
+  "click",
+  function () {
+
+    const file =
+      videoFile.files[0];
+
+    if (!file) {
+
+      status.innerText =
+        "⚠️ Video အရင်ရွေးပါ";
+
+      return;
+
+    }
+
+    status.innerText =
+      "✅ Upload ခလုတ် အလုပ်လုပ်နေပါပြီ!\n\n" +
+      "Video: " +
+      file.name;
+
+  }
+);
 
 </script>
 
