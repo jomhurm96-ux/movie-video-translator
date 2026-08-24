@@ -1,4 +1,7 @@
+import { GoogleGenAI } from "@google/genai";
+
 export default async function handler(req, res) {
+
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "POST method required"
@@ -6,73 +9,65 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { text, targetLanguage } = req.body || {};
 
-    if (!text) {
+    const { fileUri, mimeType, targetLanguage } =
+      req.body || {};
+
+    if (!fileUri) {
       return res.status(400).json({
-        error: "Text is required"
+        error: "fileUri is required"
       });
     }
+
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY
+    });
 
     const prompt = `
-Translate this movie recap text into ${targetLanguage}.
+Watch and understand this video.
 
-Rules:
-- Keep the original meaning.
-- Make the translation natural for movie recap narration.
-- Do not explain anything.
+Extract the spoken dialogue and translate it into ${targetLanguage}.
+
+Requirements:
+- Keep the meaning accurate.
+- Keep the dialogue in order.
+- Make the translation natural.
+- Do not add explanations.
 - Return only the translated text.
-
-Text:
-${text}
 `;
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": process.env.GEMINI_API_KEY
+    const result = await ai.models.generateContent({
+
+      model: "gemini-3.6-flash",
+
+      contents: [
+        {
+          fileData: {
+            fileUri: fileUri,
+            mimeType: mimeType || "video/mp4"
+          }
         },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt
-                }
-              ]
-            }
-          ]
-        })
-      }
-    );
+        {
+          text: prompt
+        }
+      ]
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: data.error?.message || "Gemini API error"
-      });
-    }
+    });
 
     const translated =
-      data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!translated) {
-      return res.status(500).json({
-        error: "Gemini returned no translation"
-      });
-    }
+      result.text || "";
 
     return res.status(200).json({
-      translated: translated
+      translated
     });
 
   } catch (error) {
+
+    console.error(error);
+
     return res.status(500).json({
       error: error.message
     });
+
   }
 }
