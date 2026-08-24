@@ -41,6 +41,7 @@ button {
   border-radius: 8px;
   border: none;
   font-size: 16px;
+  box-sizing: border-box;
 }
 
 input,
@@ -86,45 +87,32 @@ video {
 <input
   type="file"
   id="videoFile"
-  accept="video/*"
+  accept="video/mp4,video/webm,video/quicktime"
 >
 
-<video
-  id="preview"
-  controls>
-</video>
-
-<h3>🌐 ဘာသာစကားရွေးပါ</h3>
+<video id="preview" controls></video>
 
 <select id="language">
-
-<option value="Burmese">
-🇲🇲 မြန်မာ
-</option>
-
-<option value="Thai">
-🇹🇭 ထိုင်း
-</option>
-
-<option value="English">
-🇬🇧 English
-</option>
-
+  <option value="Burmese">🇲🇲 မြန်မာ</option>
+  <option value="Thai">🇹🇭 ထိုင်း</option>
+  <option value="English">🇬🇧 English</option>
 </select>
 
-<button onclick="translateVideo()">
-🚀 Translate Video
+<button onclick="uploadVideo()">
+🚀 Upload & Translate
 </button>
 
 <div id="status">
-Video ရွေးပြီး Translate နှိပ်ပါ
+Video ရွေးပြီး Upload & Translate နှိပ်ပါ
 </div>
 
 </div>
-
 </div>
 
-<script>
+<script type="module">
+
+import { upload } from
+"https://cdn.jsdelivr.net/npm/@vercel/blob@2.0.0/+esm";
 
 const videoFile =
 document.getElementById("videoFile");
@@ -135,9 +123,10 @@ document.getElementById("preview");
 const status =
 document.getElementById("status");
 
-videoFile.addEventListener("change", function () {
 
-  const file = this.files[0];
+videoFile.addEventListener("change", () => {
+
+  const file = videoFile.files[0];
 
   if (!file) return;
 
@@ -152,13 +141,10 @@ videoFile.addEventListener("change", function () {
 });
 
 
-async function translateVideo() {
+window.uploadVideo = async function () {
 
   const file =
     videoFile.files[0];
-
-  const language =
-    document.getElementById("language").value;
 
   if (!file) {
 
@@ -168,66 +154,24 @@ async function translateVideo() {
     return;
   }
 
-  if (file.size > 20 * 1024 * 1024) {
-
-    status.innerText =
-      "⚠️ အခုစမ်းသပ် version မှာ Video 20MB အောက်ပဲ ထည့်ပါ";
-
-    return;
-  }
-
   status.innerText =
-    "⏳ Gemini က Video ကိုဖတ်နေပါတယ်...";
+    "⏳ Video ကို Upload လုပ်နေပါတယ်...";
 
   try {
 
-    const reader =
-      new FileReader();
+    const blob =
+      await upload(
+        file.name,
+        file,
+        {
+          access: "public",
+          handleUploadUrl: "/api/video"
+        }
+      );
 
-    reader.onload = async function () {
-
-      const base64 =
-        reader.result.split(",")[1];
-
-      const response =
-        await fetch("/api/video", {
-
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-
-            videoBase64: base64,
-
-            mimeType: file.type,
-
-            targetLanguage: language
-
-          })
-
-        });
-
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.error || "Video translation failed"
-        );
-
-      }
-
-      status.innerText =
-        "✅ ဘာသာပြန်ပြီးပါပြီ\n\n" +
-        data.translated;
-
-    };
-
-    reader.readAsDataURL(file);
+    status.innerText =
+      "✅ Video Upload ပြီးပါပြီ!\n\n" +
+      blob.url;
 
   } catch (error) {
 
@@ -236,7 +180,7 @@ async function translateVideo() {
 
   }
 
-}
+};
 
 </script>
 
