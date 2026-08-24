@@ -11,7 +11,7 @@
       padding: 30px 20px;
       background: #0b0b0f;
       color: white;
-      font-family: Arial;
+      font-family: Arial, sans-serif;
     }
 
     .box {
@@ -33,17 +33,30 @@
       font-size: 16px;
     }
 
+    input,
+    select {
+      background: #25252d;
+      color: white;
+      border: 1px solid #444;
+    }
+
     button {
       background: #ff1744;
       color: white;
       border: 0;
       font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: #555;
     }
 
     video {
       width: 100%;
       margin-top: 20px;
       display: none;
+      border-radius: 10px;
     }
 
     #status {
@@ -52,6 +65,7 @@
       background: #25252d;
       border-radius: 8px;
       white-space: pre-wrap;
+      word-break: break-word;
     }
   </style>
 </head>
@@ -116,12 +130,14 @@ videoFile.addEventListener("change", function () {
 
   status.innerText =
     "✅ Video ရွေးပြီးပါပြီ\n" +
-    file.name;
+    file.name + "\n" +
+    Math.round(file.size / 1024 / 1024) +
+    " MB";
 
 });
 
 
-button.addEventListener("click", function () {
+button.addEventListener("click", async function () {
 
   const file =
     videoFile.files[0];
@@ -134,10 +150,57 @@ button.addEventListener("click", function () {
     return;
   }
 
+  button.disabled = true;
+
   status.innerText =
-    "✅ Upload ခလုတ် အလုပ်လုပ်နေပါပြီ\n\n" +
-    "Video: " +
-    file.name;
+    "⏳ Video Upload လုပ်နေပါတယ်...";
+
+  try {
+
+    const response =
+      await fetch("/api/video", {
+
+        method: "POST",
+
+        headers: {
+          "content-type": "application/json"
+        },
+
+        body: JSON.stringify({
+          type: "blob.generate-client-token",
+          pathname: "videos/" + file.name,
+          callbackUrl: "/api/video",
+          multipart: true
+        })
+
+      });
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error || "Upload token error"
+      );
+
+    }
+
+    status.innerText =
+      "✅ Upload system အလုပ်လုပ်နေပါပြီ\n\n" +
+      JSON.stringify(data);
+
+  } catch (error) {
+
+    status.innerText =
+      "❌ Error:\n" +
+      error.message;
+
+  } finally {
+
+    button.disabled = false;
+
+  }
 
 });
 
