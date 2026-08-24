@@ -1,0 +1,170 @@
+!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Movie Video Translator</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0b0f;
+    color: white;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #ff1744;
+}
+
+p {
+    color: #aaa;
+}
+
+.box {
+    background: #18181f;
+    padding: 25px;
+    border-radius: 15px;
+    margin-top: 25px;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+}
+
+input, select {
+    background: #25252d;
+    color: white;
+}
+
+button {
+    background: #ff1744;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #d50032;
+}
+
+video {
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 10px;
+    display: none;
+}
+
+#status {
+    text-align: center;
+    margin-top: 20px;
+    color: #aaa;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🎬 Movie Video Translator</h1>
+
+<div class="box">
+
+<p>Movie Video ရွေးပါ</p>
+
+<input
+    type="file"
+    id="videoFile"
+    accept="video/*"
+>
+
+<video id="videoPreview" controls></video>
+
+<p>ဘာသာပြန်မည့် ဘာသာစကား</p>
+
+<select id="language">
+
+<option value="my">🇲🇲 မြန်မာ</option>
+
+<option value="th">🇹🇭 ထိုင်း</option>
+
+<option value="en">🇬🇧 English</option>
+
+</select>
+
+<button onclick="startTranslate()">
+🚀 Translate Video
+</button>
+
+<div id="status">
+Video ရွေးပြီး Translate နှိပ်ပါ
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const videoFile =
+document.getElementById("videoFile");
+
+const videoPreview =
+document.getElementById("videoPreview");
+
+const status =
+document.getElementById("status");
+
+videoFile.addEventListener("change", function() {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    videoPreview.src =
+    URL.createObjectURL(file);
+
+    videoPreview.style.display =
+    "block";
+
+    status.innerText =
+    "✅ Video ရွေးပြီးပါပြီ";
+
+});
+
+function startTranslate() {
+
+    const file =
+    videoFile.files[0];
+
+    if (!file) {
+
+        status.innerText =
+        "⚠️ Video အရင်ရွေးပါ";
+
+        return;
+    }
+
+    status.innerText =
+    "⏳ ဘာသာပြန်ရန် ပြင်ဆင်နေပါတယ်...";
+
+}
+
+</script>
+
+</body>
+</html>
