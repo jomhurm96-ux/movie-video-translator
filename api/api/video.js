@@ -14,16 +14,60 @@ export default async function handler(req, res) {
       });
     }
 
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY is not configured"
+      });
+    }
+
+    // Convert Base64 to binary
+    const videoBuffer = Buffer.from(videoBase64, "base64");
+
+    // Upload video to Gemini File API
+    const uploadResponse = await fetch(
+      "https://generativelanguage.googleapis.com/upload/v1beta/files",
+      {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": apiKey,
+          "Content-Type": mimeType || "video/mp4"
+        },
+        body: videoBuffer
+      }
+    );
+
+    const uploadData = await uploadResponse.json();
+
+    if (!uploadResponse.ok) {
+      return res.status(uploadResponse.status).json({
+        error:
+          uploadData.error?.message ||
+          "Gemini file upload failed"
+      });
+    }
+
+    const fileUri = uploadData.file?.uri;
+
+    if (!fileUri) {
+      return res.status(500).json({
+        error: "Gemini did not return a file URI"
+      });
+    }
+
+    // Ask Gemini to understand and translate the video
     const prompt = `
 Watch this video carefully.
 
-Extract the spoken dialogue from the video.
-Then translate the dialogue into ${targetLanguage}.
+First understand the spoken dialogue.
+Then translate the spoken dialogue into ${targetLanguage}.
 
 Requirements:
 - Keep the meaning accurate.
+- Keep the order of the dialogue.
 - Make it natural for movie recap narration.
-- Keep the dialogue in the same general order.
+- Do not add explanations.
 - Return only the translated text.
 `;
 
@@ -33,16 +77,16 @@ Requirements:
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": process.env.GEMINI_API_KEY
+          "x-goog-api-key": apiKey
         },
         body: JSON.stringify({
           contents: [
             {
               parts: [
                 {
-                  inline_data: {
+                  file_data: {
                     mime_type: mimeType || "video/mp4",
-                    data: videoBase64
+                    file_uri: fileUri
                   }
                 },
                 {
@@ -59,20 +103,32 @@ Requirements:
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error: data.error?.message || "Gemini video error"
+        error:
+          data.error?.message ||
+          "Gemini video processing failed"
       });
     }
 
     const translated =
-      data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      data.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || "")
+        .join("") || "";
+
+    if (!translated) {
+      return res.status(500).json({
+        error: "Gemini returned no translation"
+      });
+    }
 
     return res.status(200).json({
       translated
     });
 
   } catch (error) {
+
     return res.status(500).json({
       error: error.message
     });
+
   }
 }
