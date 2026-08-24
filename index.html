@@ -1,162 +1,233 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movie Video Translator</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      background: #0b0b0f;
-      color: white;
-      font-family: Arial, sans-serif;
-    }
+<title>Movie Video Translator</title>
 
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 30px 20px;
-    }
+<style>
+body {
+  margin: 0;
+  background: #0b0b0f;
+  color: white;
+  font-family: Arial, sans-serif;
+}
 
-    h1 {
-      text-align: center;
-      color: #ff1744;
-    }
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 30px 20px;
+}
 
-    .box {
-      background: #18181f;
-      padding: 25px;
-      border-radius: 15px;
-      margin-top: 25px;
-    }
+h1 {
+  text-align: center;
+  color: #ff1744;
+}
 
-    textarea {
-      width: 100%;
-      height: 180px;
-      box-sizing: border-box;
-      background: #25252d;
-      color: white;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 15px;
-      font-size: 16px;
-    }
+.box {
+  background: #18181f;
+  padding: 25px;
+  border-radius: 15px;
+  margin-top: 25px;
+}
 
-    select,
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 15px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-    }
+input,
+select,
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 15px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
 
-    select {
-      background: #25252d;
-      color: white;
-    }
+input,
+select {
+  background: #25252d;
+  color: white;
+}
 
-    button {
-      background: #ff1744;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+button {
+  background: #ff1744;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      background: #25252d;
-      border-radius: 10px;
-      min-height: 80px;
-      white-space: pre-wrap;
-    }
-  </style>
+video {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 10px;
+  display: none;
+}
+
+#status {
+  margin-top: 20px;
+  padding: 15px;
+  background: #25252d;
+  border-radius: 10px;
+  white-space: pre-wrap;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <h1>🎬 Movie Recap Translator</h1>
+<h1>🎬 Movie Video Translator</h1>
 
-  <div class="box">
+<div class="box">
 
-    <h3>Movie Recap စာသား</h3>
+<h3>🎥 Video ထည့်ပါ</h3>
 
-    <textarea id="text">Hello, this is a movie dialogue.</textarea>
+<input
+  type="file"
+  id="videoFile"
+  accept="video/*"
+>
 
-    <select id="language">
-      <option value="Burmese">🇲🇲 မြန်မာ</option>
-      <option value="Thai">🇹🇭 ထိုင်း</option>
-      <option value="English">🇬🇧 English</option>
-    </select>
+<video
+  id="preview"
+  controls>
+</video>
 
-    <button onclick="startTranslate()">
-      🚀 Gemini Translate
-    </button>
+<h3>🌐 ဘာသာစကားရွေးပါ</h3>
 
-    <div id="status">
-      ဘာသာပြန်စာ ဒီမှာပေါ်မယ်...
-    </div>
+<select id="language">
 
-  </div>
+<option value="Burmese">
+🇲🇲 မြန်မာ
+</option>
+
+<option value="Thai">
+🇹🇭 ထိုင်း
+</option>
+
+<option value="English">
+🇬🇧 English
+</option>
+
+</select>
+
+<button onclick="translateVideo()">
+🚀 Translate Video
+</button>
+
+<div id="status">
+Video ရွေးပြီး Translate နှိပ်ပါ
+</div>
+
+</div>
 
 </div>
 
 <script>
 
-async function startTranslate() {
+const videoFile =
+document.getElementById("videoFile");
 
-  const text =
-    document.getElementById("text").value;
+const preview =
+document.getElementById("preview");
+
+const status =
+document.getElementById("status");
+
+videoFile.addEventListener("change", function () {
+
+  const file = this.files[0];
+
+  if (!file) return;
+
+  preview.src =
+    URL.createObjectURL(file);
+
+  preview.style.display = "block";
+
+  status.innerText =
+    "✅ Video ရွေးပြီးပါပြီ";
+
+});
+
+
+async function translateVideo() {
+
+  const file =
+    videoFile.files[0];
 
   const language =
     document.getElementById("language").value;
 
-  const status =
-    document.getElementById("status");
+  if (!file) {
 
-  if (!text.trim()) {
     status.innerText =
-      "⚠️ စာသားထည့်ပါ";
+      "⚠️ Video အရင်ရွေးပါ";
+
+    return;
+  }
+
+  if (file.size > 20 * 1024 * 1024) {
+
+    status.innerText =
+      "⚠️ အခုစမ်းသပ် version မှာ Video 20MB အောက်ပဲ ထည့်ပါ";
+
     return;
   }
 
   status.innerText =
-    "⏳ Gemini ဘာသာပြန်နေပါတယ်...";
+    "⏳ Gemini က Video ကိုဖတ်နေပါတယ်...";
 
   try {
 
-    const response = await fetch(
-      "/api/translate",
-      {
-        method: "POST",
+    const reader =
+      new FileReader();
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+    reader.onload = async function () {
 
-        body: JSON.stringify({
-          text: text,
-          targetLanguage: language
-        })
+      const base64 =
+        reader.result.split(",")[1];
+
+      const response =
+        await fetch("/api/video", {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+
+            videoBase64: base64,
+
+            mimeType: file.type,
+
+            targetLanguage: language
+
+          })
+
+        });
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.error || "Video translation failed"
+        );
+
       }
-    );
 
-    const data =
-      await response.json();
+      status.innerText =
+        "✅ ဘာသာပြန်ပြီးပါပြီ\n\n" +
+        data.translated;
 
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Translation failed"
-      );
-    }
+    };
 
-    status.innerText =
-      "✅ " + data.translated;
+    reader.readAsDataURL(file);
 
   } catch (error) {
 
@@ -164,6 +235,7 @@ async function startTranslate() {
       "❌ Error: " + error.message;
 
   }
+
 }
 
 </script>
