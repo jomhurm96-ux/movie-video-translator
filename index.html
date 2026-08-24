@@ -22,6 +22,11 @@
       border-radius: 15px;
     }
 
+    h1 {
+      text-align: center;
+      color: #ff1744;
+    }
+
     input,
     select,
     button {
@@ -100,7 +105,10 @@
 
 </div>
 
-<script>
+<script type="module">
+
+import { upload } from "https://cdn.jsdelivr.net/npm/@vercel/blob@2.0.0/+esm";
+
 
 const videoFile =
   document.getElementById("videoFile");
@@ -115,7 +123,7 @@ const status =
   document.getElementById("status");
 
 
-videoFile.addEventListener("change", function () {
+videoFile.addEventListener("change", () => {
 
   const file =
     videoFile.files[0];
@@ -129,15 +137,16 @@ videoFile.addEventListener("change", function () {
     "block";
 
   status.innerText =
-    "✅ Video ရွေးပြီးပါပြီ\n" +
-    file.name + "\n" +
+    "✅ Video ရွေးပြီးပါပြီ\n\n" +
+    file.name +
+    "\n" +
     Math.round(file.size / 1024 / 1024) +
     " MB";
 
 });
 
 
-button.addEventListener("click", async function () {
+button.addEventListener("click", async () => {
 
   const file =
     videoFile.files[0];
@@ -153,47 +162,30 @@ button.addEventListener("click", async function () {
   button.disabled = true;
 
   status.innerText =
-    "⏳ Video Upload လုပ်နေပါတယ်...";
+    "⏳ Video Upload လုပ်နေပါတယ်...\n\n" +
+    "19 MB ဆို ခဏစောင့်ပါ။";
 
   try {
 
-    const response =
-      await fetch("/api/video", {
-
-        method: "POST",
-
-        headers: {
-          "content-type": "application/json"
-        },
-
-        body: JSON.stringify({
-          type: "blob.generate-client-token",
-          pathname: "videos/" + file.name,
-          callbackUrl: "/api/video",
-          multipart: true
-        })
-
-      });
-
-    const data =
-      await response.json();
-
-    if (!response.ok) {
-
-      throw new Error(
-        data.error || "Upload token error"
-      );
-
-    }
+    const blob = await upload(
+      file.name,
+      file,
+      {
+        access: "public",
+        handleUploadUrl: "/api/video"
+      }
+    );
 
     status.innerText =
-      "✅ Upload system အလုပ်လုပ်နေပါပြီ\n\n" +
-      JSON.stringify(data);
+      "✅ Video Upload အောင်မြင်ပါပြီ!\n\n" +
+      blob.url;
 
   } catch (error) {
 
+    console.error(error);
+
     status.innerText =
-      "❌ Error:\n" +
+      "❌ Upload Error:\n\n" +
       error.message;
 
   } finally {
