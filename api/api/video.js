@@ -1,31 +1,22 @@
 import { handleUpload } from "@vercel/blob/client";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "POST method required"
-    });
-  }
-
   try {
-    const body = req.body;
-
     const response = await handleUpload({
-      body,
+      body: req.body,
       request: req,
-      onBeforeGenerateToken: async (pathname) => {
+      onBeforeGenerateToken: async () => {
         return {
           allowedContentTypes: [
             "video/mp4",
             "video/webm",
             "video/quicktime"
           ],
-          maximumSizeInBytes: 100 * 1024 * 1024,
-          addRandomSuffix: true
+          maximumSizeInBytes: 100 * 1024 * 1024
         };
       },
       onUploadCompleted: async ({ blob }) => {
-        console.log("Upload completed:", blob.url);
+        console.log("Uploaded:", blob.url);
       }
     });
 
@@ -38,4 +29,3 @@ export default async function handler(req, res) {
       error: error.message
     });
   }
-}
