@@ -1,27 +1,29 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      error: "POST only"
+      error: "POST method required"
     });
   }
 
   try {
-    const { text, targetLanguage } = req.body;
+    const { text, targetLanguage } = req.body || {};
 
-    if (!text || !targetLanguage) {
+    if (!text) {
       return res.status(400).json({
-        error: "text and targetLanguage are required"
+        error: "Text is required"
       });
     }
 
     const prompt = `
-Translate the following movie dialogue into ${targetLanguage}.
+Translate this movie recap text into ${targetLanguage}.
 
-Keep the meaning natural and suitable for movie recap narration.
-Do not add explanations.
-Return only the translated text.
+Rules:
+- Keep the original meaning.
+- Make the translation natural for movie recap narration.
+- Do not explain anything.
+- Return only the translated text.
 
-TEXT:
+Text:
 ${text}
 `;
 
@@ -56,10 +58,16 @@ ${text}
     }
 
     const translated =
-      data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!translated) {
+      return res.status(500).json({
+        error: "Gemini returned no translation"
+      });
+    }
 
     return res.status(200).json({
-      translated
+      translated: translated
     });
 
   } catch (error) {
