@@ -3,101 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movie Video Translator</title>
+  <title>Movie Recap Translator</title>
 
   <style>
     body {
       margin: 0;
+      padding: 30px 20px;
       background: #0b0b0f;
       color: white;
       font-family: Arial, sans-serif;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: auto;
-      padding: 30px 20px;
-    }
-
-    h1 {
       text-align: center;
-      color: #ff1744;
     }
 
     .box {
-      background: #18181f;
+      max-width: 700px;
+      margin: 30px auto;
       padding: 25px;
+      background: #18181f;
       border-radius: 15px;
-      margin-top: 25px;
     }
 
     input,
     select,
     button {
       width: 100%;
-      padding: 14px;
+      box-sizing: border-box;
+      padding: 15px;
       margin-top: 15px;
       border-radius: 8px;
-      border: none;
       font-size: 16px;
-      box-sizing: border-box;
     }
 
     input,
     select {
       background: #25252d;
       color: white;
+      border: 1px solid #444;
     }
 
     button {
+      border: none;
       background: #ff1744;
       color: white;
       font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-
-    video {
-      width: 100%;
-      margin-top: 20px;
-      border-radius: 10px;
-      display: none;
     }
 
     #status {
       margin-top: 20px;
       padding: 15px;
       background: #25252d;
-      border-radius: 10px;
+      border-radius: 8px;
       white-space: pre-wrap;
-      word-break: break-word;
+    }
+
+    video {
+      width: 100%;
+      margin-top: 20px;
+      display: none;
     }
   </style>
 </head>
 
 <body>
 
-<div class="container">
-
-  <h1>🎬 Movie Video Translator</h1>
+  <h1>🎬 Movie Recap Translator</h1>
 
   <div class="box">
-
-    <h3>🎥 Video ထည့်ပါ</h3>
 
     <input
       type="file"
       id="videoFile"
-      accept="video/mp4,video/webm,video/quicktime"
+      accept="video/*"
     >
 
     <video id="preview" controls></video>
-
-    <h3>🌐 ဘာသာစကားရွေးပါ</h3>
 
     <select id="language">
       <option value="Burmese">🇲🇲 မြန်မာ</option>
@@ -105,118 +84,73 @@
       <option value="English">🇬🇧 English</option>
     </select>
 
-    <button id="uploadButton" type="button">
+    <button id="uploadButton">
       🚀 Upload Video
     </button>
 
     <div id="status">
-      Video ရွေးပြီး Upload Video နှိပ်ပါ
+      Video ရွေးပါ
     </div>
 
   </div>
 
-</div>
+  <script>
 
-<script type="module">
+    const videoFile =
+      document.getElementById("videoFile");
 
-import { upload } from
-"https://cdn.jsdelivr.net/npm/@vercel/blob@2.0.0/+esm";
+    const preview =
+      document.getElementById("preview");
 
-const videoFile =
-  document.getElementById("videoFile");
+    const button =
+      document.getElementById("uploadButton");
 
-const preview =
-  document.getElementById("preview");
-
-const uploadButton =
-  document.getElementById("uploadButton");
-
-const status =
-  document.getElementById("status");
+    const status =
+      document.getElementById("status");
 
 
-videoFile.addEventListener("change", function () {
+    videoFile.onchange = function () {
 
-  const file = videoFile.files[0];
+      const file =
+        videoFile.files[0];
 
-  if (!file) {
-    return;
-  }
+      if (!file) return;
 
-  preview.src =
-    URL.createObjectURL(file);
+      preview.src =
+        URL.createObjectURL(file);
 
-  preview.style.display =
-    "block";
+      preview.style.display =
+        "block";
 
-  status.innerText =
-    "✅ Video ရွေးပြီးပါပြီ\n" +
-    file.name +
-    "\n" +
-    Math.round(file.size / 1024 / 1024) +
-    " MB";
+      status.innerText =
+        "✅ Video ရွေးပြီးပါပြီ\n" +
+        file.name;
 
-});
+    };
 
 
-uploadButton.addEventListener(
-  "click",
-  uploadVideo
-);
+    button.onclick = function () {
 
+      const file =
+        videoFile.files[0];
 
-async function uploadVideo() {
+      if (!file) {
 
-  const file =
-    videoFile.files[0];
+        status.innerText =
+          "⚠️ Video အရင်ရွေးပါ";
 
-  if (!file) {
+        return;
 
-    status.innerText =
-      "⚠️ Video အရင်ရွေးပါ";
-
-    return;
-  }
-
-  uploadButton.disabled = true;
-
-  status.innerText =
-    "⏳ Video Upload လုပ်နေပါတယ်...\n" +
-    "ခဏစောင့်ပါ။";
-
-  try {
-
-    const blob = await upload(
-      file.name,
-      file,
-      {
-        access: "public",
-        handleUploadUrl: "/api/video"
       }
-    );
 
-    status.innerText =
-      "✅ Video Upload အောင်မြင်ပါပြီ!\n\n" +
-      blob.url;
+      status.innerText =
+        "✅ ခလုတ်အလုပ်လုပ်နေပါပြီ!\n\n" +
+        "Video: " +
+        file.name;
 
-  } catch (error) {
+    };
 
-    console.error(error);
-
-    status.innerText =
-      "❌ Upload Error:\n" +
-      error.message;
-
-  } finally {
-
-    uploadButton.disabled =
-      false;
-
-  }
-
-}
-
-</script>
+  </script>
 
 </body>
 </html>
