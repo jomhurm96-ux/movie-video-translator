@@ -1,112 +1,120 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Video Translator</title>
 
-<title>Movie Video Translator</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b0b0f;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
 
-<style>
-body {
-  margin: 0;
-  background: #0b0b0f;
-  color: white;
-  font-family: Arial, sans-serif;
-}
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 30px 20px;
+    }
 
-.container {
-  max-width: 800px;
-  margin: auto;
-  padding: 30px 20px;
-}
+    h1 {
+      text-align: center;
+      color: #ff1744;
+    }
 
-h1 {
-  text-align: center;
-  color: #ff1744;
-}
+    .box {
+      background: #18181f;
+      padding: 25px;
+      border-radius: 15px;
+      margin-top: 25px;
+    }
 
-.box {
-  background: #18181f;
-  padding: 25px;
-  border-radius: 15px;
-  margin-top: 25px;
-}
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
 
-input,
-select,
-button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 15px;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
-  box-sizing: border-box;
-}
+    input,
+    select {
+      background: #25252d;
+      color: white;
+    }
 
-input,
-select {
-  background: #25252d;
-  color: white;
-}
+    button {
+      background: #ff1744;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
 
-button {
-  background: #ff1744;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
 
-video {
-  width: 100%;
-  margin-top: 20px;
-  border-radius: 10px;
-  display: none;
-}
+    video {
+      width: 100%;
+      margin-top: 20px;
+      border-radius: 10px;
+      display: none;
+    }
 
-#status {
-  margin-top: 20px;
-  padding: 15px;
-  background: #25252d;
-  border-radius: 10px;
-  white-space: pre-wrap;
-}
-</style>
+    #status {
+      margin-top: 20px;
+      padding: 15px;
+      background: #25252d;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>🎬 Movie Video Translator</h1>
+  <h1>🎬 Movie Video Translator</h1>
 
-<div class="box">
+  <div class="box">
 
-<h3>🎥 Video ထည့်ပါ</h3>
+    <h3>🎥 Video ထည့်ပါ</h3>
 
-<input
-  type="file"
-  id="videoFile"
-  accept="video/mp4,video/webm,video/quicktime"
->
+    <input
+      type="file"
+      id="videoFile"
+      accept="video/mp4,video/webm,video/quicktime"
+    >
 
-<video id="preview" controls></video>
+    <video id="preview" controls></video>
 
-<select id="language">
-  <option value="Burmese">🇲🇲 မြန်မာ</option>
-  <option value="Thai">🇹🇭 ထိုင်း</option>
-  <option value="English">🇬🇧 English</option>
-</select>
+    <h3>🌐 ဘာသာစကားရွေးပါ</h3>
 
-<button onclick="uploadVideo()">
-🚀 Upload & Translate
-</button>
+    <select id="language">
+      <option value="Burmese">🇲🇲 မြန်မာ</option>
+      <option value="Thai">🇹🇭 ထိုင်း</option>
+      <option value="English">🇬🇧 English</option>
+    </select>
 
-<div id="status">
-Video ရွေးပြီး Upload & Translate နှိပ်ပါ
-</div>
+    <button id="uploadButton" type="button">
+      🚀 Upload Video
+    </button>
 
-</div>
+    <div id="status">
+      Video ရွေးပြီး Upload Video နှိပ်ပါ
+    </div>
+
+  </div>
+
 </div>
 
 <script type="module">
@@ -115,33 +123,49 @@ import { upload } from
 "https://cdn.jsdelivr.net/npm/@vercel/blob@2.0.0/+esm";
 
 const videoFile =
-document.getElementById("videoFile");
+  document.getElementById("videoFile");
 
 const preview =
-document.getElementById("preview");
+  document.getElementById("preview");
+
+const uploadButton =
+  document.getElementById("uploadButton");
 
 const status =
-document.getElementById("status");
+  document.getElementById("status");
 
 
-videoFile.addEventListener("change", () => {
+videoFile.addEventListener("change", function () {
 
   const file = videoFile.files[0];
 
-  if (!file) return;
+  if (!file) {
+    return;
+  }
 
   preview.src =
     URL.createObjectURL(file);
 
-  preview.style.display = "block";
+  preview.style.display =
+    "block";
 
   status.innerText =
-    "✅ Video ရွေးပြီးပါပြီ";
+    "✅ Video ရွေးပြီးပါပြီ\n" +
+    file.name +
+    "\n" +
+    Math.round(file.size / 1024 / 1024) +
+    " MB";
 
 });
 
 
-window.uploadVideo = async function () {
+uploadButton.addEventListener(
+  "click",
+  uploadVideo
+);
+
+
+async function uploadVideo() {
 
   const file =
     videoFile.files[0];
@@ -154,33 +178,43 @@ window.uploadVideo = async function () {
     return;
   }
 
+  uploadButton.disabled = true;
+
   status.innerText =
-    "⏳ Video ကို Upload လုပ်နေပါတယ်...";
+    "⏳ Video Upload လုပ်နေပါတယ်...\n" +
+    "ခဏစောင့်ပါ။";
 
   try {
 
-    const blob =
-      await upload(
-        file.name,
-        file,
-        {
-          access: "public",
-          handleUploadUrl: "/api/video"
-        }
-      );
+    const blob = await upload(
+      file.name,
+      file,
+      {
+        access: "public",
+        handleUploadUrl: "/api/video"
+      }
+    );
 
     status.innerText =
-      "✅ Video Upload ပြီးပါပြီ!\n\n" +
+      "✅ Video Upload အောင်မြင်ပါပြီ!\n\n" +
       blob.url;
 
   } catch (error) {
 
+    console.error(error);
+
     status.innerText =
-      "❌ Error: " + error.message;
+      "❌ Upload Error:\n" +
+      error.message;
+
+  } finally {
+
+    uploadButton.disabled =
+      false;
 
   }
 
-};
+}
 
 </script>
 
