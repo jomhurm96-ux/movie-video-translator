@@ -54,6 +54,10 @@
       cursor: pointer;
     }
 
+    button:active {
+      transform: scale(0.98);
+    }
+
     button:disabled {
       background: #555;
     }
@@ -75,12 +79,12 @@
     }
 
     #timer {
+      display: none;
       margin-top: 15px;
       text-align: center;
       font-size: 28px;
       font-weight: bold;
       color: #ff1744;
-      display: none;
     }
   </style>
 </head>
@@ -97,7 +101,10 @@
     accept="video/*"
   >
 
-  <video id="preview" controls></video>
+  <video
+    id="preview"
+    controls>
+  </video>
 
   <select id="language">
 
@@ -115,7 +122,9 @@
 
   </select>
 
-  <button id="uploadButton" type="button">
+  <button
+    id="uploadButton"
+    type="button">
     🚀 Upload Video
   </button>
 
@@ -128,6 +137,7 @@
   </div>
 
 </div>
+
 
 <script>
 
@@ -146,22 +156,26 @@ const status =
 const timer =
   document.getElementById("timer");
 
+
 let seconds = 0;
+
 let timerInterval = null;
 
 
-function showTime() {
+function formatTime(totalSeconds) {
 
   const minutes =
-    Math.floor(seconds / 60);
+    Math.floor(totalSeconds / 60);
 
   const secs =
-    seconds % 60;
+    totalSeconds % 60;
 
-  timer.innerText =
+  return (
     String(minutes).padStart(2, "0") +
     ":" +
-    String(secs).padStart(2, "0");
+    String(secs).padStart(2, "0")
+  );
+
 }
 
 
@@ -172,7 +186,9 @@ videoFile.addEventListener(
     const file =
       videoFile.files[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     preview.src =
       URL.createObjectURL(file);
@@ -182,7 +198,13 @@ videoFile.addEventListener(
 
     status.innerText =
       "✅ Video ရွေးပြီးပါပြီ\n\n" +
-      file.name;
+      "📁 " +
+      file.name + "\n" +
+      "📦 " +
+      Math.round(
+        file.size / 1024 / 1024
+      ) +
+      " MB";
 
   }
 );
@@ -201,34 +223,51 @@ button.addEventListener(
         "⚠️ Video အရင်ရွေးပါ";
 
       return;
-
     }
+
 
     button.disabled = true;
 
+
     seconds = 0;
 
-    showTime();
+    timer.innerText =
+      "00:00";
 
     timer.style.display =
       "block";
 
+
     status.innerText =
-      "⏳ Upload လုပ်နေပါတယ်...";
+      "⏳ Video ကို စစ်နေပါတယ်...\n\n" +
+      "📁 " +
+      file.name;
+
+
+    clearInterval(timerInterval);
+
 
     timerInterval =
-      setInterval(function () {
+      setInterval(
+        function () {
 
-        seconds++;
+          seconds++;
 
-        showTime();
+          timer.innerText =
+            formatTime(seconds);
 
-        status.innerText =
-          "⏳ Upload လုပ်နေပါတယ်...\n\n" +
-          "ကြာချိန်: " +
-          timer.innerText;
+          status.innerText =
+            "⏳ video လု်နေသည်...\n\n" +
+            "ကြာချိန်: " +
+            formatTime(seconds) +
+            "\n\n" +
+            "📁 " +
+            file.name;
 
-      }, 1000);
+        },
+        1000
+      );
+
 
   }
 );
