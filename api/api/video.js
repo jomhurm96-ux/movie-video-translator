@@ -1,37 +1,58 @@
-import { handleUpload } from "@vercel/blob/client";
+import { put } from "@vercel/blob";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      error: "Method not allowed"
+      error: "POST method required"
     });
   }
 
   try {
-    const response = await handleUpload({
-      body: req.body,
-      request: req,
+    const chunks = [];
 
-      onBeforeGenerateToken: async () => ({
-        allowedContentTypes: [
-          "video/mp4",
-          "video/webm",
-          "video/quicktime"
-        ],
-        maximumSizeInBytes: 100 * 1024 * 1024
-      }),
+    for await (const chunk of req) {
+      chunks.push(
+        Buffer.isBuffer(chunk)
+          ? chunk
+          : Buffer.from(chunk)
+      );
+    }
 
-      onUploadCompleted: async ({ blob }) => {
-        console.log("Uploaded:", blob.url);
+    const body = Buffer.concat(chunks);
+
+    if (!body.length) {
+      return res.status(400).json({
+        error: "No video received"
+      });
+    }
+
+    const contentType =
+      req.headers["content-type"] ||
+      "video/mp4";
+
+    const blob = await put(
+      "videos/" +
+      Date.now() +
+      ".mp4",
+      body,
+      {
+        access: "public",
+        contentType: contentType,
+        token: process.env.BLOB_READ_WRITE_TOKEN
       }
+    );
+
+    return res.status(200).json({
+      success: true,
+      url: blob.url
     });
 
-    return res.status(200).json(response);
-
   } catch (error) {
+
     console.error(error);
 
     return res.status(500).json({
+      success: false,
       error: error.message
     });
   }
