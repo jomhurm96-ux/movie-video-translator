@@ -137,79 +137,26 @@ videoFile.addEventListener(
 );
 
 
-button.addEventListener("click", async function () {
+button.addEventListener(
+  "click",
+  function () {
 
-  const file = videoFile.files[0];
+    const file =
+      videoFile.files[0];
 
-  if (!file) {
-    status.innerText = "⚠️ Video အရင်ရွေးပါ";
-    return;
-  }
+    if (!file) {
 
-  button.disabled = true;
+      status.innerText =
+        "⚠️ Video အရင်ရွေးပါ";
 
-  status.innerText =
-    "⏳ Video Upload စနေပါတယ်...";
+      return;
 
-  try {
-
-    const response = await fetch(
-      "/api/upload",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          filename: file.name,
-          contentType: file.type
-        })
-      }
-    );
-
-    const data =
-      await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Upload setup failed"
-      );
     }
 
     status.innerText =
-      "⏳ Upload ဆက်လုပ်နေပါတယ်...";
-
-    const uploadResponse =
-      await fetch(data.url, {
-        method: "PUT",
-        headers: {
-          "Content-Type":
-            file.type || "video/mp4"
-        },
-        body: file
-      });
-
-    if (!uploadResponse.ok) {
-      throw new Error(
-        "Video upload failed"
-      );
-    }
-
-    status.innerText =
-      "✅ Video Upload အောင်မြင်ပါပြီ!";
-
-  } catch (error) {
-
-    status.innerText =
-      "❌ Upload Error:\n\n" +
-      error.message;
-
-  } finally {
-
-    button.disabled = false;
+      "✅ Upload ခလုတ် အလုပ်လုပ်နေပါပြီ!\n\n" +
+      "Video: " +
+      file.name;
 
   }
-
-});
+);
