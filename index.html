@@ -54,6 +54,10 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      background: #555;
+    }
+
     video {
       width: 100%;
       margin-top: 20px;
@@ -68,6 +72,15 @@
       border-radius: 8px;
       white-space: pre-wrap;
       word-break: break-word;
+    }
+
+    #timer {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff1744;
+      display: none;
     }
   </style>
 </head>
@@ -106,12 +119,15 @@
     🚀 Upload Video
   </button>
 
+  <div id="timer">
+    00:00
+  </div>
+
   <div id="status">
     Video ရွေးပါ
   </div>
 
 </div>
-
 
 <script>
 
@@ -126,6 +142,27 @@ const button =
 
 const status =
   document.getElementById("status");
+
+const timer =
+  document.getElementById("timer");
+
+let seconds = 0;
+let timerInterval = null;
+
+
+function showTime() {
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  const secs =
+    seconds % 60;
+
+  timer.innerText =
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(secs).padStart(2, "0");
+}
 
 
 videoFile.addEventListener(
@@ -167,10 +204,31 @@ button.addEventListener(
 
     }
 
+    button.disabled = true;
+
+    seconds = 0;
+
+    showTime();
+
+    timer.style.display =
+      "block";
+
     status.innerText =
-      "✅ Upload ခလုတ် အလုပ်လုပ်နေပါပြီ!\n\n" +
-      "Video: " +
-      file.name;
+      "⏳ Upload လုပ်နေပါတယ်...";
+
+    timerInterval =
+      setInterval(function () {
+
+        seconds++;
+
+        showTime();
+
+        status.innerText =
+          "⏳ Upload လုပ်နေပါတယ်...\n\n" +
+          "ကြာချိန်: " +
+          timer.innerText;
+
+      }, 1000);
 
   }
 );
